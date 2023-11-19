@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script><link rel="stylesheet" href="src/styles.css"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
+    <script src="plotly.min.js"></script>
+    <meta charset="UTF-8" />
+    <style>
+body {
+  font-family: sans-serif;
+}
+
+input[type="text"] {
+  height: 80%;
+  width: 50%;
+  font-size: 32px;
+  text-align: center; /* To center it horizontally (if you want) */
+  line-height: 75px; /* To center it vertically */
+  color: black;
+  margin-left: 25%;
+  padding:25px 25px;
+}
+
+tr {
+  font-size: 40px;
+}
+
+h2 {
+  margin-top: 2%;
+  margin-left: 5%;
+}
+
+#content {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.btn[type="button"] {
+  margin-top: 5%;
+  height: 75%;
+  width: 100%;
+  font-size: 22px;
+  text-align: center; /* To center it horizontally (if you want) */
+  line-height: 30px; /* To center it vertically */
+  padding: 5%;
+  font-size: 75px;
+}
+
+a[role="button"] {
+  width: 100%;
+  margin-top: 2%;
+  margin-bottom: 1%;
+}
+
+#test {
+  color: gray;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  top: 20px;
+  display: inline-block;
+  width: 120px;
+  height: 68px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch p {
+  position: relative;
+  top: 80px;
+  left: 30px;
+  display: inline-block;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 52px;
+  width: 52px;
+  left: 8px;
+  bottom: 8px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #21f344;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #21f344;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(52px);
+  -ms-transform: translateX(52px);
+  transform: translateX(52px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 68px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.btn  {
+    color: black;
+}
+
+.btn:focus {     
+    color: red;    
+}
+    </style>
+  </head>
+  <body>
+    <div class='card'>
+    <div class="row">
+        <div class="col-sm-8">
+            <h2>Калькулятор нечёткой логики, v191123</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <ul>
+              <li>! отрицание</li>
+              <li>| объединение</li>
+              <li>& пересечение</li>
+              <li>- вычитание правого из левого</li>
+              <li>xor дизъюнктивная сумма</li>
+              <li>+ алгебраическая сумма</li>
+              <li>* алгебраическое произведение</li>
+            </ul>
+        </div>
+        <div class="col-sm">
+          <input id="prompt" value="" placeholder="C = A + B" type="text">
+        </div>
+        <div class="col-sm-3">
+            <div>
+              <label class="switch">
+                <p>Вариант 1</p>
+                <input type="checkbox" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm d-flex align-items-center justify-content-center" id="chart">
+            <img src='load_ico.gif' width="50px"/>
+        </div>
+    </div>
+    <script>
+        const switchElem = document.getElementsByClassName('switch')[0]
+                                   .getElementsByTagName('input')[0];
+        const switchLabel = document.getElementsByClassName('switch')[0]
+                                    .getElementsByTagName('p')[0];
+        const promptElem = document.getElementById('prompt');
+
+        switchElem.addEventListener("change", (e)=>{
+            const evt = document.createEvent("HTMLEvents");
+            evt.initEvent("change", false, true);
+            promptElem.dispatchEvent(evt);
+            switchLabel.textContent = switchElem.checked ? 'Вариант 2' : 'Вариант 1';
+        });
+
+        promptElem.addEventListener("change", (e)=>{
+            try {
+                let prompt = promptElem.value || promptElem.getAttribute("placeholder");
+                prompt = prompt.trim();
+                prompt = prompt
+                    .replaceAll('-', '/')
+                    .replaceAll('\\', '/')
+                    .replaceAll('¬', '~')
+                    .replaceAll('!', '~')
+                    .replaceAll('U', '|')
+                    .replaceAll('∩', '&')
+                    .replaceAll('⊕', '^')
+                    .replaceAll('xor', '^')
+                    .replaceAll('∙', '*')
+                calcAndDrawFuzzy(prompt);
+                promptElem.style.color = 'black';
+            } catch {
+                promptElem.style.color = 'red';
+            }
+        });
+
+        /*
+        ¬ отрицание
+        U объединение
+        ∩ пересечение
+        \ вычитание
+        ⊕ дизъюнктивная сумма
+        + алгебраическая сумма
+        ∙ алгебраическое произведение
+        */
+    </script>
+    <script async defer src="logic.js"></script>
+  </body>
+</html>
